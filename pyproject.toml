@@ -1,0 +1,19 @@
+[build-system]
+requires = ["setuptools>=61"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "how-cli"
+version = "0.1.0"
+description = "Type what you want in plain English, get the command."
+requires-python = ">=3.9"
+dependencies = []
+
+[project.optional-dependencies]
+ai = ["anthropic"]
+
+[project.scripts]
+how = "how.cli:main"
+
+[tool.setuptools]
+packages = ["how"]
