@@ -17,12 +17,38 @@ Pick a command and `how` asks you to fill in the `<placeholders>`, then runs it,
 
 ## Install
 
+Install it straight from GitHub (needs Python 3.9+ and Git):
+
 ```
-pip install -e .            # offline mode, no dependencies
-pip install -e ".[ai]"      # optional: Claude re-ranks and writes commands it hasn't seen
+pip install git+https://github.com/manjeetgodara/shell_whisper.git
 ```
 
-Requires Python 3.9 or newer. If your terminal can't find `how` after installing, add the folder that pip's warning names to your PATH, or run it as `python -m how ...`.
+With the optional Claude features (Claude re-ranks and writes commands it hasn't seen):
+
+```
+pip install "how-cli[ai] @ git+https://github.com/manjeetgodara/shell_whisper.git"
+```
+
+To update to the latest version:
+
+```
+pip install --upgrade git+https://github.com/manjeetgodara/shell_whisper.git
+```
+
+Then try it:
+
+```
+how list running containers
+```
+
+**From a local copy** (if you cloned the repo to edit the code):
+
+```
+pip install -e .            # offline mode, no dependencies
+pip install -e ".[ai]"      # with the optional Claude features
+```
+
+If your terminal can't find `how` after installing, add the folder that pip's warning names to your PATH, or run it as `python -m how ...`.
 
 ## Share it with someone else
 
@@ -43,7 +69,7 @@ For an update, bump `version` in `pyproject.toml`, rebuild, and send the new fil
 **Install from GitHub (best for a team).** Push this folder to a repo, leaving out `dist/`, `*.egg-info/` and `__pycache__/`. Anyone can then install it with:
 
 ```
-pip install git+https://github.com/<you>/how.git
+pip install git+https://github.com/manjeetgodara/shell_whisper.git
 ```
 
 Run the same command with `--upgrade` to get the latest version.
