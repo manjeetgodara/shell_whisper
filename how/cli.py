@@ -45,7 +45,7 @@ def cmd_query(argv):
     p = argparse.ArgumentParser(prog="how", description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     p.add_argument("query", nargs="+", help="what you want to do, in plain English")
     p.add_argument("-n", type=int, default=7, help="number of suggestions")
-    p.add_argument("--ai", dest="ai", action="store_true", default=None, help="force Claude ranking")
+    p.add_argument("--ai", dest="ai", action="store_true", default=None, help="force AI ranking (DeepInfra or Claude)")
     p.add_argument("--no-ai", dest="ai", action="store_false", help="offline ranking only")
     p.add_argument("-p", "--print", action="store_true", help="print the best match and exit (for scripts)")
     p.add_argument("--version", action="version", version=f"how {__version__}")
@@ -55,14 +55,17 @@ def cmd_query(argv):
     results = search.rank(query, limit=max(a.n, 15))
     use_ai = ai.available() if a.ai is None else a.ai
     if use_ai:
-        print(f"{DIM}asking Claude…{RESET}", end="\r", flush=True)
+        print(f"{DIM}asking {ai.label()}…{RESET}", end="\r", flush=True)
         smart = ai.suggest(query, results, n=a.n)
-        print(" " * 20, end="\r")
+        print(" " * 30, end="\r")
         if smart:
             known = {e["cmd"]: e for e in results}
-            results = [{**known.get(s["cmd"], {}), **s} for s in smart]
+            picked = [{**known.get(s["cmd"], {}), **s} for s in smart]
+            # The model may return fewer than asked for: top up with the offline matches.
+            seen = {e["cmd"] for e in picked}
+            results = picked + [e for e in results if e["cmd"] not in seen]
         elif a.ai:
-            print(f"{DIM}(Claude unavailable — showing offline matches){RESET}")
+            print(f"{DIM}({ai.label()} unavailable — showing offline matches){RESET}")
     results = results[: a.n]
     for e in results:
         e["risk"] = e.get("risk") or risk.classify(e["cmd"], e.get("desc", ""))
@@ -82,6 +85,7 @@ def cmd_query(argv):
 
 def main(argv=None):
     _out_utf8()
+    store.load_env()
     argv = list(sys.argv[1:] if argv is None else argv)
     if not argv:
         print(__doc__)

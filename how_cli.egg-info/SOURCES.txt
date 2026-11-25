@@ -1,3 +1,4 @@
+LICENSE
 README.md
 pyproject.toml
 how/__init__.py
@@ -11,6 +12,16 @@ how/risk.py
 how/runner.py
 how/search.py
 how/store.py
+how/kbdata/__init__.py
+how/kbdata/cloud.py
+how/kbdata/containers.py
+how/kbdata/devtools.py
+how/kbdata/iac.py
+how/kbdata/kubernetes.py
+how/kbdata/linux.py
+how/kbdata/network.py
+how/kbdata/vcs_ci.py
+how/kbdata/windows.py
 how_cli.egg-info/PKG-INFO
 how_cli.egg-info/SOURCES.txt
 how_cli.egg-info/dependency_links.txt

@@ -29,7 +29,7 @@ _READ_WORDS = {
 }
 _DANGER_FLAGS = re.compile(
     r"(^|\s)(--force\b|--hard\b|-rf\b|-fr\b|--all\b.*\b(rm|prune|delete)|"
-    r"--delete\b|--prune\b|--no-preserve-root\b|-D\b|--purge\b|--volumes\b)"
+    r"--delete\b|--prune\b|--no-preserve-root\b|-D\b|--purge\b|--volumes\b|--vacuum-\w+)"
 )
 _DANGER_PATTERNS = re.compile(r">\s*/dev/sd|:\(\)\s*\{|\bsudo\s+rm\b|\bgit\s+push\b.*--force")
 _CURL_WRITES = re.compile(r"\s(-X|--request|-d|--data\S*|-F|--form|-T)(\s|=|$)")
@@ -44,11 +44,15 @@ def classify(cmd: str, description: str = "") -> str:
     if re.search(r"\breset\s+--soft\b", cmd):
         return WRITE  # moves the branch pointer only; files are untouched
     if words and words[0] == "curl":
+        if re.search(r"\s(-X|--request)\s*DELETE\b", cmd, re.I):
+            return DANGER
         return WRITE if _CURL_WRITES.search(cmd) else READ
     if words and words[0] in {"rm", "rmdir", "shred", "dd", "mkfs", "kill", "killall", "pkill"}:
         return DANGER
     if any(v in _DANGER_WORDS for v in verbs):
         return DANGER
+    if any(v.split("-")[0] in {"delete", "remove", "destroy", "purge", "clear"} for v in words):
+        return DANGER  # delete-context, Remove-Item, Clear-RecycleBin, ...
     if any(v in _WRITE_WORDS for v in verbs) or (words and words[0] in _WRITE_WORDS):
         return WRITE
     if any(v in _READ_WORDS for v in verbs) or (words and words[0] in _READ_WORDS):

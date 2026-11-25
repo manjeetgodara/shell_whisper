@@ -1,0 +1,11 @@
+# secrets
+.env
+.env.*
+!.env.example
+
+# python build artifacts
+__pycache__/
+*.pyc
+build/
+dist/
+*.egg-info/

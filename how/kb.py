@@ -71,6 +71,21 @@ _RAW = [
     ("git blame <file>", "Show who last changed each line", "", "who changed author"),
     ("git cherry-pick <commit>", "Apply one commit onto the current branch", "", "copy commit apply"),
     ("git remote -v", "Show remote URLs", "", "remote origin url"),
+    # ----------------------------------------------------------- navigation
+    ("pwd", "Show the current (present) working directory",
+     "pwd = print working directory. Works in bash, zsh and PowerShell.",
+     "where am i current present working directory folder path location check"),
+    ("cd", "Show the current directory (Windows cmd)", "In cmd, cd with no argument prints where you are.",
+     "current present working directory folder path where windows cmd check"),
+    ("cd <dir>", "Change to another directory", "cd = change directory. Use quotes if the path has spaces.",
+     "change go move switch enter open navigate directory folder"),
+    ("cd ..", "Go up to the parent directory", ".. always means the parent; . means here.",
+     "up parent back directory folder change go"),
+    ("cd ~", "Go to your home directory", "~ = home. Plain `cd` does the same in bash.", "home directory folder change go"),
+    ("cd -", "Go back to the previous directory", "- = last directory you were in (bash/zsh/PowerShell 7).",
+     "previous back last directory folder change go"),
+    ("mkdir -p <dir>", "Create a directory (and any missing parents)", "-p = parents; no error if it exists.",
+     "make create new directory folder"),
     # ------------------------------------------------------- files & search
     ("ls -lah", "List files with sizes and hidden files", "-l long, -a all, -h human-readable sizes.", "list files directory"),
     ("find . -name '<pattern>'", "Find files by name under the current directory", "", "search locate file name"),
@@ -118,6 +133,13 @@ _RAW = [
 ]
 
 
+def _raw():
+    yield from _RAW
+    from how import kbdata
+    for mod in kbdata.modules():
+        yield from getattr(mod, "RAW", [])
+
+
 def entries():
-    for cmd, desc, why, tags in _RAW:
+    for cmd, desc, why, tags in _raw():
         yield {"cmd": cmd, "desc": desc, "why": why, "tags": tags, "tool": cmd.split()[0], "source": "builtin"}

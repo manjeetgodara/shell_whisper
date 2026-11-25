@@ -1,9 +1,12 @@
 """Local ranking: BM25 over command + description + keywords, with synonyms and history boost."""
 import math
+import os
 import re
 from collections import Counter
 
 from how import kb, risk, store
+
+IS_WINDOWS = os.name == "nt"
 
 STOP = set("a an the to of in on for with my me i how do can is are be it this that and or all from by "
            "what which show me want need using use get".split()) - {"get", "show"}
@@ -18,6 +21,10 @@ SYNONYMS = {
     "port": "ports", "copy": "cp", "find": "search grep", "container": "containers", "image": "images",
     "network": "networks", "restart": "reboot", "k8s": "kubectl kubernetes", "kubernetes": "kubectl",
     "branch": "branches", "clean": "prune cleanup", "free": "prune clean", "running": "ps",
+    "present": "current working pwd", "current": "present working pwd", "where": "pwd current location",
+    "change": "cd switch", "go": "cd change", "navigate": "cd change", "move": "mv cd",
+    "directory": "folder dir", "folder": "directory dir", "dir": "directory folder",
+    "parent": "up ..", "make": "create", "create": "make new",
 }
 
 
@@ -78,6 +85,8 @@ def rank(query: str, limit: int = 8, entries=None):
             continue
         if stem(e["tool"].lower()) in tools_in_query:
             s *= 1.6  # user named the tool
+        if "windows" in e.get("tags", "").split() and "window" not in tools_in_query:
+            s *= 1.25 if IS_WINDOWS else 0.6  # prefer commands for the OS the user is on
         s += 0.3 * math.log1p(usage.get(e["cmd"], 0))
         scored.append((s, e))
     scored.sort(key=lambda x: -x[0])

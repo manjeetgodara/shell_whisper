@@ -16,4 +16,4 @@ ai = ["anthropic"]
 how = "how.cli:main"
 
 [tool.setuptools]
-packages = ["how"]
+packages = ["how", "how.kbdata"]

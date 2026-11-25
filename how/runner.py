@@ -157,6 +157,10 @@ def run_entry(entry: dict, template_cmd: str, action: str = "ask") -> int:
     if action == "print":
         print(filled)
         return 0
+    if action == "run" and re.match(r"cd\s+\S", filled):
+        # A child process can't change the parent shell's directory, so running it would do nothing.
+        print(f"{DIM}cd only works in your own shell — paste it there.{RESET}")
+        action = "copy"
     if action == "copy":
         print(f"{GREEN}copied{RESET}  {filled}" if copy_to_clipboard(filled) else filled)
         return 0

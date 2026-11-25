@@ -61,3 +61,45 @@ def bump_usage(cmd: str) -> None:
 
 def usage() -> dict:
     return load("usage", {})
+
+
+# --- .env settings ------------------------------------------------------------
+def env_files() -> list:
+    """Trusted .env locations, lowest priority first: ~/.how/.env, then the project folder's .env.
+
+    The current directory is deliberately NOT read: a .env in some random repo could point
+    DEEPINFRA_BASE_URL at another server and capture your key.
+    """
+    return [home() / ".env", Path(__file__).resolve().parent.parent / ".env"]
+
+
+def parse_env(text: str) -> dict:
+    out = {}
+    for line in text.splitlines():
+        line = line.strip()
+        if not line or line.startswith("#"):
+            continue
+        if line.startswith("export "):
+            line = line[7:].lstrip()
+        key, sep, value = line.partition("=")
+        key, value = key.strip(), value.strip()
+        if not sep or not key:
+            continue
+        if len(value) >= 2 and value[0] == value[-1] and value[0] in "'\"":
+            value = value[1:-1]
+        elif " #" in value:
+            value = value.split(" #", 1)[0].rstrip()  # inline comment
+        out[key] = value
+    return out
+
+
+def load_env() -> None:
+    """Fill os.environ from .env files. Variables already set in the shell always win."""
+    merged = {}
+    for f in env_files():
+        try:
+            merged.update(parse_env(f.read_text(encoding="utf-8-sig")))
+        except OSError:
+            pass
+    for key, value in merged.items():
+        os.environ.setdefault(key, value)
